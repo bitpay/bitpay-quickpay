@@ -2,8 +2,8 @@
 /*
  * Plugin Name: BitPay QuickPay
  * Description: Create BitPay payment buttons with a shortcode
- * Version: 1.0
- * Author: Joshua Lewis - jlewis@bitpay.com
+ * Version: 1.0.0.0
+ * Author: Joshua Lewis - sales-engineering@bitpay.com
  * Author URI: https://www.bitpay.com
  */
 

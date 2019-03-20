@@ -3,13 +3,93 @@
  * Plugin Name: BitPay QuickPay
  * Description: Create BitPay payment buttons with a shortcode
  * Version: 1.0.0.0
- * Author: Joshua Lewis - sales-engineering@bitpay.com
- * Author URI: https://www.bitpay.com
+ * Author: BitPay
+ * Author URI: mailto:integrations@bitpay.com?subject=BitPay QuickPay
  */
 
 add_action('admin_menu', 'bitpayquickpay_setup_menu');
 add_action('wp_enqueue_scripts', 'enable_bitpayquickpay_js');
 add_action('admin_enqueue_scripts', 'admin_enable_bitpayquickpay_js');
+
+#autoloader
+function BPCQP_autoloader($class)
+{
+    if (strpos($class, 'BPC_') !== false):
+        if (!class_exists('BitPayLib/' . $class, false)):
+            #doesnt exist so include it
+            include 'BitPayLib/' . $class . '.php';
+        endif;
+    endif;
+}
+
+spl_autoload_register('BPCQP_autoloader');
+
+add_action('admin_notices', 'bitpayquickpay_check_token');
+
+function bitpayquickpay_check_token()
+{
+    $bitpay_token = get_option('bitpayquickpay_option_dev_token');
+    $env = 'test';
+    if (get_option('bitpayquickpay_option_endpoint') == 'production'):
+        $env = 'production';
+        $bitpay_token = get_option('bitpayquickpay_option_prod_token');
+    endif;
+    $config = new BPC_Configuration($bitpay_token, $env);
+    if (empty($bitpay_token)): ?>
+    <!--
+    <div class="error notice is-dismissible">
+        <p>
+            <?php _e('There is no token set for your <b>' . strtoupper($env) . '</b> environment.  <b>BitPay</b> will not function if this is not set.');?>
+        </p>
+    </div>
+    -->
+    <?php
+    ##check and see if the token is valid
+    else:
+    if (isset($_GET['settings-updated']) && !empty($bitpay_token) && !empty($env)) {
+        if (!BPQP_checkBitPayToken($bitpay_token, $env)): ?>
+        <div class="error notice">
+            <p>
+                <?php _e('The token for <b>' . strtoupper($env) . '</b> is invalid.  Please verify your settings.');?>
+            </p>
+        </div>
+    <?php else:?>
+    <div class="notice notice-success is-dismissible">
+            <p>
+                <?php _e('Your settings have been saved.');?>
+            </p>
+        </div>
+   <?php endif;
+    }
+
+?>
+<?php endif;
+}
+
+function BPQP_checkBitPayToken($bitpay_token, $bitpay_checkout_endpoint)
+{
+    #we're going to see if we can create an invoice
+    $config = new BPC_Configuration($bitpay_token, $bitpay_checkout_endpoint);
+    //sample values to create an item, should be passed as an object'
+    $params = new stdClass();
+    $params->extension_version = BPC_getBitPayVersionInfo();
+    $params->price = '10.00';
+    $params->currency = 'USD'; //set as needed
+
+    $item = new BPC_Item($config, $params);
+    $invoice = new BPC_Invoice($item);
+
+    //this creates the invoice with all of the config params from the item
+    $invoice->BPC_createInvoice();
+    $invoiceData = json_decode($invoice->BPC_getInvoiceData());
+    //now we have to append the invoice transaction id for the callback verification
+    $invoiceID = $invoiceData->data->id;
+    if (empty($invoiceID)):
+        return false;
+    else:
+        return true;
+    endif;
+}
 
 function enable_bitpayquickpay_js()
 {
@@ -42,23 +122,30 @@ function bitpayquickpay_register_settings()
 }
 add_action('admin_init', 'bitpayquickpay_register_settings');
 
+
+
+
+
+
+
 #create the shortcode
 function getBitPayQuickPayData($atts)
 {
     $buttonStyle = $atts['name'];
     $buttonPrice = $atts['price'];
-    return getBitPayQuickPayBrands($buttonStyle, $buttonPrice);
+    $buttonDesc = $atts['description'];
+    $buttonOverride = $atts['allow_override'];
+    return getBitPayQuickPayBrands($buttonStyle, $buttonPrice,$buttonDesc,$buttonOverride);
 
 }
 add_shortcode('bitpayquickpay', 'getBitPayQuickPayData');
 
 #brand returned from API
-function getBitPayQuickPayBrands($name_only = false, $price = false)
+function getBitPayQuickPayBrands($name_only = false, $price = false,$d = false,$bto = false)
 {
-
-    require_once 'classes/Buttons.php';
-    $buttonObj = new Buttons;
-    $buttons = json_decode($buttonObj->getButtons());
+   #require_once 'classes/Buttons.php';
+    $buttonObj = new BPC_Buttons;
+    $buttons = json_decode($buttonObj->BPC_getButtons());
     if (!$name_only) { #get the images
 
         $brand = '';
@@ -67,10 +154,21 @@ function getBitPayQuickPayBrands($name_only = false, $price = false)
             $names = preg_split('/(?=[A-Z])/', $b->name);
             $names = implode(" ", $names);
             $names = ucwords($names);
+            if (strpos($names, "Donate") === 0):
+                continue;
+            endif;
             $shortcode_name = strtolower($b->name);
+            
 
             $brand .= '<figure style="float:left;"><figcaption style="text-align:left;"><b>' . $names . '</b><p>' . $b->description . '</p></figcaption>';
-            $brand .= '<input class="bp_input" style="margin-bottom: 17px;height: 35px;" onkeyup = "generateBPQPCode(this.value,\'' . $shortcode_name . '\');" placeholder="Enter the amount" id = "gen_' . $shortcode_name . '"type="text" size="20"><img src="//' . $b->url . '" style="width:150px;padding:1px;display: block;"></figure>';
+            $brand .= '<input class="bp_input" style="margin-bottom: 17px;height: 35px;" onkeyup = "BPQP_Clean(this.value,\'' . $shortcode_name . '\');" placeholder="Enter the amount" id = "gen_' . $shortcode_name . '" type="text" size="20">';
+            $brand .= '<input type="checkbox" style = "margin-left:10px;" id = "chk_' . $shortcode_name . '"> Allow users to change amount<br>
+            ';
+            $brand .= '<input class="bp_input" style="margin-bottom: 17px;height: 35px;" placeholder="Description (optional)" id = "desc_' . $shortcode_name . '"type="text" size="30">';
+            $brand .='<img src="//' . $b->url . '" style="width:150px;padding:1px;display: block;">';
+            $brand .='<br><button class = "button button-secondary" onclick = "generateBPQPCode(\''.$shortcode_name.'\')">Create Code</button>';
+            $brand .='<hr style = "margin-top:40px;">';
+
             $brand .= '</figure>';
         endforeach;
 
@@ -80,12 +178,25 @@ function getBitPayQuickPayBrands($name_only = false, $price = false)
             $shortcode_name = strtolower($b->name);
             if ($shortcode_name == $name_only && $price != false):
                 $env = 'test';
-
                 if (get_option('bitpayquickpay_option_endpoint') == 'production'):
                     $env = 'production';
                 endif;
                 $post_url = get_home_url() . '/wp-json/bitpayquickpay/pay';
-                return "<img onclick = \"showBpQp('$env','$post_url','$price');\" src ='//" . $b->url . "'>";
+                $btn_id = 'btnPay_'.uniqid();
+                $btn = '<div class = "bpQp">';
+
+                $type = 'hidden';
+                if($bto == true){
+                    $type = 'text';
+                }
+
+                $btn .='<input class="bp_input" id = "'.$btn_id.'" style="margin-bottom: 17px;height: 35px;" placeholder="Enter the amount" value = "'.$price.'" type="'.$type.'" size="20" onkeyup = "BPQPFrontend_Clean(this.value,\''.$btn_id.'\')">';
+                $btn .= '<input type = "hidden" id = "desc_'.$btn_id.'" value = "'.$d.'">';
+
+                $btn.= "<img onclick = \"showBpQp('$env','$post_url','$btn_id');\" src ='//" . $b->url . "'>";
+                $btn.='</div>';
+                return $btn;
+               
             endif;
 
         endforeach;
@@ -104,12 +215,9 @@ function bitpayquickpay_pay(WP_REST_Request $request)
 {
     $data = $request->get_params();
     $price = $data['price'];
-    #include the bp classes
-    require 'classes/Config.php';
-    require 'classes/Client.php';
-    require 'classes/Item.php';
-    require 'classes/Invoice.php';
-
+    $description = $data['description'];
+    error_log('$description: '.$description);
+    
     #create the invoice
     $env = 'test';
     $bitpay_token = get_option('bitpayquickpay_option_dev_token');
@@ -119,7 +227,7 @@ function bitpayquickpay_pay(WP_REST_Request $request)
         $bitpay_token = get_option('bitpayquickpay_option_prod_token');
 
     endif;
-    $config = new Configuration($bitpay_token, $env);
+    $config = new BPC_Configuration($bitpay_token, $env);
     //sample values to create an item, should be passed as an object'
     $params = new stdClass();
     $params->extension_version = getBitpayQuickpayInfo();
@@ -129,12 +237,15 @@ function bitpayquickpay_pay(WP_REST_Request $request)
     if (empty(get_option('bitpayquickpay_option_currency'))):
         $params->currency = 'USD';
     endif;
+    if($description != ''){
+        $params->itemDesc =$description;
+    }
 
-    $item = new Item($config, $params);
-    $invoice = new Invoice($item);
+    $item = new BPC_Item($config, $params);
+    $invoice = new BPC_Invoice($item);
     //this creates the invoice with all of the config params from the item
-    $invoice->createInvoice();
-    $invoiceData = json_decode($invoice->getInvoiceData());
+    $invoice->BPC_createInvoice();
+    $invoiceData = json_decode($invoice->BPC_getInvoiceData());
 
     return $invoiceData;
 
@@ -261,18 +372,17 @@ function load_options()
     echo '<div style = "width:100%;">';
     echo '<h4>BitPay QuickPay Shortcode Options</h4>';
     echo '<p>Use the <b>shortcode</b> tag to embed anywhere.</p>';
-    echo '<p>You must pass the "name" and "price" as an option to pre-fill the invoice, ie <em>[bitpayquickpay name ="paywithbitpaybutton" price="25"]</em> to load one of the buttons below.</p>';
-    echo '<p>Adjust the price for any button below to have your code automatically generated.</p>';
-    echo '<div style = "width:100%;clear:both;margin-top:40px;margin-bottom:40px;"></div>';
-
+    
+    echo '<div style = "width:100%;clear:both;margin-top:20px;margin-bottom:20px;"></div>';
     echo '<div style = "width:100%;">';
     echo '<div style = "width:45%;float:left;">';
+    echo '<span style = "margin-left:20px;"><b>1) Adjust the price for any button below to have your code automatically generated.</b><br><br></span>';
     echo $images;
     echo '</div>';
 
     #vertical div
     echo '<div id = "vline" class = "vline" style = "float:left;height:550px;border-left-width:1px;border-left-style:solid;border-left-color:#ddd;"></div>';
-    echo '<span style = "margin-left:20px;"><b>Copy and paste the code below to a post/page/widget.</b><br><br></span>';
+    echo '<span style = "margin-left:20px;"><b>2) Copy and paste the code below to a <a href="edit.php?post_type=post">Post</a> or <a href="edit.php?post_type=page">Page</a></b><br><br></span>';
     echo '<div style =" width:45%;float:left;margin-left:20px;background-color:#ffffff;padding:20px;">';
     echo '<span id = "generated_code"><b>your generated code will appear here</b></span>';
     echo '</div>';

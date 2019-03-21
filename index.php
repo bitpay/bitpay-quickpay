@@ -12,7 +12,7 @@ add_action('wp_enqueue_scripts', 'enable_bitpayquickpay_js');
 add_action('admin_enqueue_scripts', 'admin_enable_bitpayquickpay_js');
 
 #autoloader
-function BPCQP_autoloader($class)
+function BPQP_autoloader($class)
 {
     if (strpos($class, 'BPC_') !== false):
         if (!class_exists('BitPayLib/' . $class, false)):
@@ -21,11 +21,22 @@ function BPCQP_autoloader($class)
         endif;
     endif;
 }
+spl_autoload_register('BPQP_autoloader');
 
-spl_autoload_register('BPCQP_autoloader');
+#custom css
+add_action('init', 'bitpay_quickpay_css');
+function bitpay_quickpay_css() {
+    wp_register_style( 'bpqp', plugins_url('/css/bitpayquickpay.css', __FILE__), false, '1.0.0', 'all');
+}
+add_action('wp_enqueue_scripts', 'bpqp_enqueue_style');
+function bpqp_enqueue_style(){
+    wp_enqueue_style( 'bpqp' );
+ }
+
+
+
 
 add_action('admin_notices', 'bitpayquickpay_check_token');
-
 function bitpayquickpay_check_token()
 {
     $bitpay_token = get_option('bitpayquickpay_option_dev_token');
@@ -102,7 +113,7 @@ function admin_enable_bitpayquickpay_js()
 
 function bitpayquickpay_setup_menu()
 {
-    add_menu_page('BitPay QuickPay Setup', 'BitPay QuickPay', 'manage_options', 'bitpay-quickpay', 'load_options');
+    add_menu_page('BitPay QuickPay Setup', 'BitPay QuickPay', 'manage_options', 'bitpay-quickpay', 'bpqp_load_options');
 }
 
 function bitpayquickpay_register_settings()
@@ -122,12 +133,6 @@ function bitpayquickpay_register_settings()
 }
 add_action('admin_init', 'bitpayquickpay_register_settings');
 
-
-
-
-
-
-
 #create the shortcode
 function getBitPayQuickPayData($atts)
 {
@@ -143,7 +148,6 @@ add_shortcode('bitpayquickpay', 'getBitPayQuickPayData');
 #brand returned from API
 function getBitPayQuickPayBrands($name_only = false, $price = false,$d = false,$bto = false)
 {
-   #require_once 'classes/Buttons.php';
     $buttonObj = new BPC_Buttons;
     $buttons = json_decode($buttonObj->BPC_getButtons());
     if (!$name_only) { #get the images
@@ -193,12 +197,11 @@ function getBitPayQuickPayBrands($name_only = false, $price = false,$d = false,$
                 $btn .='<input class="bp_input" id = "'.$btn_id.'" style="margin-bottom: 17px;height: 35px;" placeholder="Enter the amount" value = "'.$price.'" type="'.$type.'" size="20" onkeyup = "BPQPFrontend_Clean(this.value,\''.$btn_id.'\')">';
                 $btn .= '<input type = "hidden" id = "desc_'.$btn_id.'" value = "'.$d.'">';
 
-                $btn.= "<img onclick = \"showBpQp('$env','$post_url','$btn_id');\" src ='//" . $b->url . "'>";
+                $btn.= "<button class = 'bpqpButton' onclick = \"showBpQp('$env','$post_url','$btn_id');\"><img src ='//" . $b->url . "'></button>";
                 $btn.='</div>';
                 return $btn;
                
             endif;
-
         endforeach;
 
     }
@@ -216,7 +219,6 @@ function bitpayquickpay_pay(WP_REST_Request $request)
     $data = $request->get_params();
     $price = $data['price'];
     $description = $data['description'];
-    error_log('$description: '.$description);
     
     #create the invoice
     $env = 'test';
@@ -251,11 +253,10 @@ function bitpayquickpay_pay(WP_REST_Request $request)
 
 }
 
-function BitPayGetCurrencies()
+function BitPayQPGetCurrencies()
 {
     $currencies = ["USD", "EUR", "GBP", "JPY", "CAD", "AUD", "CNY", "CHF", "SEK", "NZD", "KRW"];
     return $currencies;
-
 }
 
 function getBitpayQuickpayInfo()
@@ -267,13 +268,11 @@ function getBitpayQuickpayInfo()
     return $plugin_version;
 }
 
-function load_options()
+function bpqp_load_options()
 {
-
     #this page creates the admin settings
     echo '<h3>Customize your BitPay QuickPay shortcodes.</h3>';
     echo '<p>Setup your environment, and preview the buttons that will be added with the shortcode</p>';
-
     ?>
 <div>
     <form method="post" action="options.php">
@@ -340,7 +339,7 @@ function load_options()
                 <td>
                     <select class="select " name="bitpayquickpay_option_currency" id="bitpayquickpay_option_currency">
 
-                        <?php $currencies = BitPayGetCurrencies();?>
+                        <?php $currencies = BitPayQPGetCurrencies();?>
                         <?php foreach ($currencies as $v) {?>
                         <option value="<?php echo $v; ?>"
                             <?php if ($v == get_option('bitpayquickpay_option_currency')): echo 'selected';endif;?>>
@@ -357,10 +356,6 @@ function load_options()
                     <em>Select <b>Test</b> for testing the plugin, <b>Production</b> when you are ready to go live.</em>
                 </td>
             </tr>
-
-
-
-
         </table>
         <?php submit_button();?>
     </form>
@@ -388,6 +383,5 @@ function load_options()
     echo '</div>';
     echo '</div>';
     echo '</div>';
-
 }
 ?>

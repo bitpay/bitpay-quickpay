@@ -1,4 +1,3 @@
-document.write('<script type="text/javascript" src="https:////bitpay.com/bitpay.min.js"></script>');
 function showBpQp(env,api,btnId){
   
     var price = jQuery('#'+btnId).val()

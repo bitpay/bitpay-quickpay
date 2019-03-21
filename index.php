@@ -104,6 +104,7 @@ function BPQP_checkBitPayToken($bitpay_token, $bitpay_checkout_endpoint)
 
 function enable_bitpayquickpay_js()
 {
+    wp_enqueue_script( 'remote-bitpayquickpay-js', 'https://bitpay.com/bitpay.min.js',null,null,true);    
     wp_enqueue_script('bitpayquickpay-js', plugins_url('/js/bitpayquickpay_js.js', __FILE__));
 }
 function admin_enable_bitpayquickpay_js()

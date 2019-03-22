@@ -111,7 +111,6 @@ function enable_bitpayquickpay_js()
     var payment_status = null;
     window.addEventListener("message", function(event) {
         payment_status = event.data.status;
-        console.log('payment_status',payment_status)
         if(payment_status == 'paid'){
             BPQPshowMessage()
         }

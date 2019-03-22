@@ -4,6 +4,12 @@
 }
 .bpqpButton:hover {opacity:.5; background-color: transparent;}
 .bpqpButton:active {
-  background-color: #000000;
-  box-shadow: 0 5px #666;
+  background-color: transparent;
 }
+
+.bpqpMsg{
+  background-color: transparent;
+  display:none;
+}
+
+.bpqpButtonClicked {opacity:.5; background-color: transparent;}

@@ -106,6 +106,19 @@ function enable_bitpayquickpay_js()
 {
     wp_enqueue_script( 'remote-bitpayquickpay-js', 'https://bitpay.com/bitpay.min.js',null,null,true);    
     wp_enqueue_script('bitpayquickpay-js', plugins_url('/js/bitpayquickpay_js.js', __FILE__));
+    ?>
+    <script type = "text/javascript">
+    var payment_status = null;
+    window.addEventListener("message", function(event) {
+        payment_status = event.data.status;
+        console.log('payment_status',payment_status)
+        if(payment_status == 'paid'){
+            BPQPshowMessage()
+        }
+    }, false);
+    </script>
+
+    <?php
 }
 function admin_enable_bitpayquickpay_js()
 {
@@ -130,6 +143,9 @@ function bitpayquickpay_register_settings()
 
     add_option('bitpayquickpay_option_currency');
     register_setting('bitpayquickpay_options_group', 'bitpayquickpay_option_currency', 'bitpayquickpay_callback');
+
+    add_option('bitpayquickpay_option_message');
+    register_setting('bitpayquickpay_options_group', 'bitpayquickpay_option_message', 'bitpayquickpay_callback');
 
 }
 add_action('admin_init', 'bitpayquickpay_register_settings');
@@ -194,10 +210,9 @@ function getBitPayQuickPayBrands($name_only = false, $price = false,$d = false,$
                 if($bto == true){
                     $type = 'text';
                 }
-
                 $btn .='<input class="bp_input" id = "'.$btn_id.'" style="margin-bottom: 17px;height: 35px;" placeholder="Enter the amount" value = "'.$price.'" type="'.$type.'" size="20" onkeyup = "BPQPFrontend_Clean(this.value,\''.$btn_id.'\')">';
+                $btn.='<div class = "bpqpMsg">'.get_option('bitpayquickpay_option_message').'</div>';
                 $btn .= '<input type = "hidden" id = "desc_'.$btn_id.'" value = "'.$d.'">';
-
                 $btn.= "<button class = 'bpqpButton' onclick = \"showBpQp('$env','$post_url','$btn_id');\"><img src ='//" . $b->url . "'></button>";
                 $btn.='</div>';
                 return $btn;
@@ -292,7 +307,7 @@ function bpqp_load_options()
             <tr align="left">
                 <td>&nbsp</td>
                 <td>
-                    <em>Your <b>development</b>merchant token. <a href="https://test.bitpay.com/dashboard/merchant/api-tokens" target="_blank">Create one
+                    <em>Your <b>development</b> merchant token. <a href="https://test.bitpay.com/dashboard/merchant/api-tokens" target="_blank">Create one
                             here</a> and <b>uncheck</b> `Require Authentication`.</em>
                 </td>
             </tr>
@@ -357,6 +372,22 @@ function bpqp_load_options()
                     <em>Select <b>Test</b> for testing the plugin, <b>Production</b> when you are ready to go live.</em>
                 </td>
             </tr>
+
+            <tr align="left">
+                <th scope="row"><label for="bitpayquickpay_option_message">Thank You Message</label></th>
+                <td><input placeholder = "Optional message after a payment is made" type="text" size="80" id="bitpayquickpay_option_message"
+                        name="bitpayquickpay_option_message"
+                        value="<?php echo get_option('bitpayquickpay_option_message'); ?>" />
+                </td>
+            </tr>
+
+            <tr align="left">
+                <td>&nbsp</td>
+                <td>
+                    <em>This message will appear after a successful payment (optional)</em>
+                </td>
+            </tr>
+
         </table>
         <?php submit_button();?>
     </form>

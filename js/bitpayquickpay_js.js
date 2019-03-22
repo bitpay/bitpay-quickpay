@@ -1,5 +1,6 @@
-function showBpQp(env,api,btnId){
-  
+
+    function showBpQp(env,api,btnId){
+    BPQPhideMessage()
     var price = jQuery('#'+btnId).val()
     if(price.length == 0){
         alert('Please enter a price')
@@ -11,6 +12,8 @@ function showBpQp(env,api,btnId){
         jQuery('#'+btnId).val('')
         return
        }
+       
+    BPQPAddClickState()   
     var d = jQuery('#desc_'+btnId).val()
     if (env == 'test'){
         bitpay.enableTestMode()
@@ -22,13 +25,21 @@ function showBpQp(env,api,btnId){
    var saveData = jQuery.ajax({
        type: 'POST',
        url: api,
-        data: myObj,
-        dataType: "text",
+       data: myObj,
+       dataType: "text",
       
        success: function (resultsData) {
+           
             response = JSON.parse(resultsData);
-            console.log(response)
+            if(typeof(response.error) !== "undefined"){
+                BPQPRemoveClickState()
+                BPQPhideMessage()
+                alert(response.error)
+                return;
+            }
+            //console.log(response)
             bitpay.showInvoice(response.data.id)
+            BPQPRemoveClickState()
        }
    });
 }
@@ -40,4 +51,19 @@ function BPQPFrontend_Clean(val,button){
         
         return
     }
+}
+function BPQPAddClickState(){
+    jQuery('.bpqpButton').addClass( "bpqpButtonClicked" );
+    jQuery('.bpqpButton').prop('disabled', true);
+}
+function BPQPRemoveClickState(){
+    jQuery('.bpqpButton').removeClass( "bpqpButtonClicked" );
+    jQuery('.bpqpButton').prop('disabled', false);
+    
+}
+function BPQPshowMessage(){
+    jQuery('.bpqpMsg').show()
+}
+function BPQPhideMessage(){
+    jQuery('.bpqpMsg').hide()
 }

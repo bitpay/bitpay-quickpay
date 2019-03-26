@@ -18,6 +18,11 @@ function showBpQp(env, api, btnId) {
     if (env == 'test') {
         bitpay.enableTestMode()
     }
+    if(d.length > 0){
+        d = d +' - ' + price
+    }else{
+        d = price
+    }
     var myObj = {
         price: price,
         description: d

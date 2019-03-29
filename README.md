@@ -1,3 +1,7 @@
+## Build Status
+
+[![Build Status](https://travis-ci.org/bitpay/bitpay-quickpay.svg?branch=master)](https://travis-ci.org/bitpay/bitpay-quickpay)
+
 # Notice
 
 This is a Community-supported project.

@@ -2,10 +2,11 @@
 /*
  * Plugin Name: BitPay QuickPay
  * Description: Create BitPay payment buttons with a shortcode.  <a href ="admin.php?page=bitpay-quickpay">Configure</a>
- * Version: 1.0.0.0
+ * Version: 1.0.0.1
  * Author: BitPay
  * Author URI: mailto:integrations@bitpay.com?subject=BitPay QuickPay
  */
+if ( ! defined( 'ABSPATH' ) ): exit;endif;
 
 add_action('admin_menu', 'bitpayquickpay_setup_menu');
 add_action('wp_enqueue_scripts', 'enable_bitpayquickpay_js');
@@ -39,6 +40,7 @@ function bpqp_enqueue_style(){
 add_action('admin_notices', 'bitpayquickpay_check_token');
 function bitpayquickpay_check_token()
 {
+    if($_GET['page'] == 'bitpay-quickpay' && $_GET['settings-updated'] == 'true' && is_admin()){
     $bitpay_token = get_option('bitpayquickpay_option_dev_token');
     $env = 'test';
     if (get_option('bitpayquickpay_option_endpoint') == 'production'):
@@ -73,8 +75,8 @@ function bitpayquickpay_check_token()
    <?php endif;
     }
 
-?>
-<?php endif;
+endif;
+}
 }
 
 function BPQP_checkBitPayToken($bitpay_token, $bitpay_checkout_endpoint)
@@ -83,7 +85,7 @@ function BPQP_checkBitPayToken($bitpay_token, $bitpay_checkout_endpoint)
     $config = new BPC_Configuration($bitpay_token, $bitpay_checkout_endpoint);
     //sample values to create an item, should be passed as an object'
     $params = new stdClass();
-    $params->extension_version = BPC_getBitPayVersionInfo();
+    $params->extension_version = BPC_getBitpayQuickpayInfo();
     $params->price = '10.00';
     $params->currency = 'USD'; //set as needed
 
@@ -164,6 +166,7 @@ add_shortcode('bitpayquickpay', 'getBitPayQuickPayData');
 #brand returned from API
 function getBitPayQuickPayBrands($name_only = false, $price = false,$d = false,$bto = false)
 {
+    if($_GET['page'] == 'bitpay-quickpay' && is_admin())
     $buttonObj = new BPC_Buttons;
     $buttons = json_decode($buttonObj->BPC_getButtons());
     if (!$name_only) { #get the images
@@ -274,7 +277,7 @@ function BitPayQPGetCurrencies()
     return $currencies;
 }
 
-function getBitpayQuickpayInfo()
+function BPC_getBitpayQuickpayInfo()
 {
     $plugin_data = get_file_data(__FILE__, array('Version' => 'Version', 'Plugin_Name' => 'Plugin Name'), false);
     $plugin_name = $plugin_data['Plugin_Name'];

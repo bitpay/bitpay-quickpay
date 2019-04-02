@@ -2,7 +2,7 @@
 /*
  * Plugin Name: BitPay QuickPay
  * Description: Create BitPay payment buttons with a shortcode.  <a href ="admin.php?page=bitpay-quickpay">Configure</a>
- * Version: 1.0.0.1
+ * Version: 1.0.0.2
  * Author: BitPay
  * Author URI: mailto:integrations@bitpay.com?subject=BitPay QuickPay
  */
@@ -158,6 +158,7 @@ function getBitPayQuickPayData($atts)
     $buttonPrice = $atts['price'];
     $buttonDesc = $atts['description'];
     $buttonOverride = $atts['allow_override'];
+   
     return getBitPayQuickPayBrands($buttonStyle, $buttonPrice,$buttonDesc,$buttonOverride);
 
 }
@@ -166,7 +167,7 @@ add_shortcode('bitpayquickpay', 'getBitPayQuickPayData');
 #brand returned from API
 function getBitPayQuickPayBrands($name_only = false, $price = false,$d = false,$bto = false)
 {
-    if($_GET['page'] == 'bitpay-quickpay' && is_admin())
+   
     $buttonObj = new BPC_Buttons;
     $buttons = json_decode($buttonObj->BPC_getButtons());
     if (!$name_only) { #get the images
@@ -250,7 +251,7 @@ function bitpayquickpay_pay(WP_REST_Request $request)
     $config = new BPC_Configuration($bitpay_token, $env);
     //sample values to create an item, should be passed as an object'
     $params = new stdClass();
-    $params->extension_version = getBitpayQuickpayInfo();
+    $params->extension_version = BPC_getBitpayQuickpayInfo();
     $params->price = $price;
     $params->currency = get_option('bitpayquickpay_option_currency');
 

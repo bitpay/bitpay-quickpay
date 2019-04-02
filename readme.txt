@@ -4,7 +4,7 @@ Tags: bitcoin, bitcoin cash, payments, bitpay, cryptocurrency, payment gateway
 Requires at least: 4.9
 Tested up to: 5.0.4
 Requires PHP: 5.5
-Stable tag: 1.0.0.1
+Stable tag: 1.0.0.2
 License: MIT License (MIT)
 License URI: https://github.com/bitpay/bitpay-quickpay/blob/master/LICENSE
 
@@ -97,3 +97,9 @@ You can contact our support team via the following form https://bitpay.com/reque
 6. BitPay hosted invoice - cryptocurrency selected
 7. BitPay hosted invoice - Customer clicked on the "open in wallet", this opens the compatible wallet installed on the device which automatically retrieves the payment information.
 8. The customer confirmed the payment via his compatible wallet. The BitPay invoice is then marked as paid, and the status will be sent via email.
+
+
+== Changelog ==
+
+= 1.0.0.2 =
+* Performance tweaks when loading buttons

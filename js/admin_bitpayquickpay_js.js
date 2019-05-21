@@ -1,3 +1,11 @@
+function setDefaultCode($looper){
+    if($looper == 0){
+        setTimeout(function(){ 
+            generateBPQPCode('paywithbitpaybutton'); 
+            }, 500);
+    }
+}
+
 function generateBPQPCode(button){
    
     //clear out other text boxes
@@ -43,6 +51,16 @@ function generateBPQPCode(button){
     jQuery("#generated_code").text(str);
 
 }
+
+function BPQP_CleanDefault(val){
+    console.log('aaa',val)
+    if (val.length == 0 || !jQuery.isNumeric(val)){
+        val = val.substring(0, val.length - 1)
+            jQuery("#bitpayquickpay_option_default_amount").val(val)
+        return
+    }   
+}
+
 
 function BPQP_Clean(val,button){
     if (val.length == 0 || !jQuery.isNumeric(val)){

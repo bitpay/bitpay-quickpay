@@ -4,7 +4,7 @@ Tags: bitcoin, bitcoin cash, payments, bitpay, cryptocurrency, payment gateway
 Requires at least: 4.9
 Tested up to: 5.0.4
 Requires PHP: 5.5
-Stable tag: 1.0.1.2
+Stable tag: 1.0.1.3
 License: MIT License (MIT)
 License URI: https://github.com/bitpay/bitpay-quickpay/blob/master/LICENSE
 
@@ -100,6 +100,9 @@ You can contact our support team via the following form https://bitpay.com/reque
 
 
 == Changelog ==
+
+= 1.0.1.3 =
+* Initialize admin buttons with default value
 
 = 1.0.1.2 =
 * Performance tweaks when loading buttons

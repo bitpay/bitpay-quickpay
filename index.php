@@ -2,7 +2,7 @@
 /*
  * Plugin Name: BitPay QuickPay
  * Description: Create BitPay payment buttons with a shortcode.  <a href ="admin.php?page=bitpay-quickpay">Configure</a>
- * Version: 1.0.1.2
+ * Version: 1.0.1.3
  * Author: BitPay
  * Author URI: mailto:integrations@bitpay.com?subject=BitPay QuickPay
  */
@@ -148,6 +148,9 @@ function bitpayquickpay_register_settings()
     add_option('bitpayquickpay_option_message');
     register_setting('bitpayquickpay_options_group', 'bitpayquickpay_option_message', 'bitpayquickpay_callback');
 
+    add_option('bitpayquickpay_option_default_amount');
+    register_setting('bitpayquickpay_options_group', 'bitpayquickpay_option_default_amount', 'bitpayquickpay_callback');
+
 }
 add_action('admin_init', 'bitpayquickpay_register_settings');
 
@@ -170,9 +173,11 @@ function getBitPayQuickPayBrands($name_only = false, $price = false,$d = false,$
    
     $buttonObj = new BPC_Buttons;
     $buttons = json_decode($buttonObj->BPC_getButtons());
+    $default_amount  = get_option('bitpayquickpay_option_default_amount');
     if (!$name_only) { #get the images
 
         $brand = '';
+        $looper = 0;
         foreach ($buttons->data as $key => $b):
 
             $names = preg_split('/(?=[A-Z])/', $b->name);
@@ -185,7 +190,7 @@ function getBitPayQuickPayBrands($name_only = false, $price = false,$d = false,$
             
 
             $brand .= '<figure style="float:left;"><figcaption style="text-align:left;"><b>' . $names . '</b><p>' . $b->description . '</p></figcaption>';
-            $brand .= '<input class="bp_input" style="margin-bottom: 17px;height: 35px;" onkeyup = "BPQP_Clean(this.value,\'' . $shortcode_name . '\');" placeholder="Enter the amount" id = "gen_' . $shortcode_name . '" type="text" size="20">';
+            $brand .= '<input class="bp_input" style="margin-bottom: 17px;height: 35px;" onkeyup = "BPQP_Clean(this.value,\'' . $shortcode_name . '\');" placeholder="Enter the amount" id = "gen_' . $shortcode_name . '" type="text" size="20" value = "'.$default_amount.'">';
             $brand .= '<input type="checkbox" style = "margin-left:10px;" id = "chk_' . $shortcode_name . '"> Allow users to change amount<br>
             ';
             $brand .= '<input class="bp_input" style="margin-bottom: 17px;height: 35px;" placeholder="Description (optional)" id = "desc_' . $shortcode_name . '"type="text" size="30">';
@@ -194,7 +199,15 @@ function getBitPayQuickPayBrands($name_only = false, $price = false,$d = false,$
             $brand .='<hr style = "margin-top:40px;">';
 
             $brand .= '</figure>';
+            #if($looper == 0):
+                #fake the click to generate the first one
+                echo '<script type = "text/javascript">';
+                echo 'setDefaultCode("'.$looper.'");';
+                echo '</script>';
+           # endif;
+            $looper++;
         endforeach;
+       
 
         return $brand;
     } else {
@@ -352,6 +365,9 @@ function bpqp_load_options()
                 </td>
             </tr>
 
+            
+
+
 
             <tr align="left">
                 <th scope="row"><label for="bitpayquickpay_option_currency">Currency</label></th>
@@ -369,12 +385,33 @@ function bpqp_load_options()
                 </td>
             </tr>
 
+            
             <tr align="left">
                 <td>&nbsp</td>
                 <td>
-                    <em>Select <b>Test</b> for testing the plugin, <b>Production</b> when you are ready to go live.</em>
+                    <em>Set yout payment currency</em>
                 </td>
             </tr>
+
+
+            <tr align="left">
+                <th scope="row"><label for="bitpayquickpay_option_default_amount">Default Amount</label></th>
+                <td>
+                <input type="text" size="80" onkeyup = "BPQP_CleanDefault(this.value)"  id="bitpayquickpay_option_default_amount"
+                        name="bitpayquickpay_option_default_amount"
+                        value="<?php echo get_option('bitpayquickpay_option_default_amount'); ?>" />
+                   
+                </td>
+               
+            </tr>
+
+            <tr align="left">
+                <td>&nbsp</td>
+                <td>
+                    <em>Set a default amount for the autogenerator</em>
+                </td>
+            </tr>
+            
 
             <tr align="left">
                 <th scope="row"><label for="bitpayquickpay_option_message">Thank You Message</label></th>

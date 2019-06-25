@@ -101,6 +101,9 @@ You can contact our support team via the following form https://bitpay.com/reque
 
 == Changelog ==
 
+= 1.0.1.4 =
+* cUrl updates
+
 = 1.0.1.3 =
 * Initialize admin buttons with default value
 

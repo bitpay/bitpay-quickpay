@@ -262,6 +262,7 @@ function bitpayquickpay_pay(WP_REST_Request $request)
     $params = new stdClass();
     $params->extension_version = BPC_getBitpayQuickpayInfo();
     $params->price = $price;
+    $params->redirectURL = $data['redirectUrl'];
     $params->currency = get_option('bitpayquickpay_option_currency');
 
     if (empty(get_option('bitpayquickpay_option_currency'))):

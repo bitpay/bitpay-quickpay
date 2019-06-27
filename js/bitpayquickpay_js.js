@@ -46,7 +46,6 @@ function showBpQp(env, api, btnId) {
                 alert(response.error)
                 return;
             }
-           console.log('response',response.data)
             bitpay.showInvoice(response.data.id)
             monitorJs(response.data.url)
 
@@ -54,9 +53,6 @@ function showBpQp(env, api, btnId) {
            
            
 
-        },
-        error: function (errorData){
-           // console.log('errorData',errorData)
         }
 
     });
@@ -102,14 +98,12 @@ function BPQPhideMessage() {
 function monitorJs(url){
     var iFrame = false
     window.onmessage = function(event) {
-        console.log('event',event)
         iFrame = true 
     }
     setTimeout(function(){ 
         if(!iFrame){
             window.location.href = url
         }
-     }, 1500);
+     }, 2500);
 
-    
 }

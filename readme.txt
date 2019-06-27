@@ -101,6 +101,9 @@ You can contact our support team via the following form https://bitpay.com/reque
 
 == Changelog ==
 
+= 1.0.1.5 =
+* Added fallback support for blocked javascript
+
 = 1.0.1.4 =
 * cUrl updates
 

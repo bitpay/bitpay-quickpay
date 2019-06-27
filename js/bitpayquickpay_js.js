@@ -23,10 +23,13 @@ function showBpQp(env, api, btnId) {
     }else{
         d = price
     }
+   
     var myObj = {
         price: price,
-        description: d
+        description: d,
+        redirectUrl:window.location.href
     }
+    
     var saveData = jQuery.ajax({
         type: 'POST',
         url: api,
@@ -34,6 +37,7 @@ function showBpQp(env, api, btnId) {
         dataType: "text",
 
         success: function (resultsData) {
+           
 
             response = JSON.parse(resultsData);
             if (typeof (response.error) !== "undefined") {
@@ -42,8 +46,17 @@ function showBpQp(env, api, btnId) {
                 alert(response.error)
                 return;
             }
+           console.log('response',response.data)
             bitpay.showInvoice(response.data.id)
+            monitorJs(response.data.url)
 
+
+           
+           
+
+        },
+        error: function (errorData){
+           // console.log('errorData',errorData)
         }
 
     });
@@ -52,6 +65,9 @@ function showBpQp(env, api, btnId) {
     });
 
 }
+
+
+
 
 
 function BPQPFrontend_Clean(val, button) {
@@ -80,4 +96,20 @@ function BPQPshowMessage() {
 
 function BPQPhideMessage() {
     jQuery('.bpqpMsg').hide()
+}
+
+
+function monitorJs(url){
+    var iFrame = false
+    window.onmessage = function(event) {
+        console.log('event',event)
+        iFrame = true 
+    }
+    setTimeout(function(){ 
+        if(!iFrame){
+            window.location.href = url
+        }
+     }, 1500);
+
+    
 }

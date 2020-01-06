@@ -4,7 +4,7 @@ Tags: bitcoin, bitcoin cash, payments, bitpay, cryptocurrency, payment gateway
 Requires at least: 4.9
 Tested up to: 5.0.4
 Requires PHP: 5.5
-Stable tag: 1.1.1910
+Stable tag: 2.1.2001
 License: MIT License (MIT)
 License URI: https://github.com/bitpay/bitpay-quickpay/blob/master/LICENSE
 
@@ -100,6 +100,8 @@ You can contact our support team via the following form https://bitpay.com/reque
 
 
 == Changelog ==
+= 2.1.2001 =
+* Added support for future Chrome / Brave extension
 
 = 1.1.1910 =
 * Fixed issue where updates might not appear in WP Admin

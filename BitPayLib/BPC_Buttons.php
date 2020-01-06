@@ -7,7 +7,7 @@ class BPC_Buttons {
 function BPC_getButtons(){
    
    
-   $button_url = 'https://bitpay.com/resources/paymentButtons';
+   $button_url = 'https://test.bitpay.com/resources/paymentButtons';
    $ch = curl_init();
    curl_setopt($ch, CURLOPT_URL, $button_url);
    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));

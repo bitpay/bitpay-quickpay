@@ -2,7 +2,7 @@
 /*
  * Plugin Name: BitPay QuickPay
  * Description: Create BitPay payment buttons with a shortcode.  <a href ="admin.php?page=bitpay-quickpay">Configure</a>
- * Version: 1.1.1910
+ * Version: 2.1.2001
  * Author: BitPay
  * Author URI: mailto:integrations@bitpay.com?subject=BitPay QuickPay
  */
@@ -295,6 +295,12 @@ function BPC_getBitpayQuickpayInfo()
     $plugin_name = str_replace(" ", "_", $plugin_name);
     $plugin_version = $plugin_name . '_' . $plugin_data['Version'];
     return $plugin_version;
+}
+
+
+add_action('wp_footer', 'bitpay_chrome_extension');
+function bitpay_chrome_extension() {
+  echo '<div id = "bpDiv123119" style = "clear:both;"></div>';
 }
 
 function bpqp_load_options()

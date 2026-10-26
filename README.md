@@ -1,12 +1,13 @@
+> [!WARNING]
+> **This plugin is no longer supported.**
+>
+> BitPay does not maintain this plugin anymore. It will not get updates, bug fixes or security fixes. This repository will be archived and become read-only.
+>
+> If you use this plugin, please move to a supported BitPay integration. You can find the current list at https://developer.bitpay.com/docs/bitpay-integration-guide.
+
 ## Build Status
 
 [![Build Status](https://travis-ci.org/bitpay/bitpay-quickpay.svg?branch=master)](https://travis-ci.org/bitpay/bitpay-quickpay)
-
-# Notice
-
-This is a Community-supported project.
-
-If you are interested in becoming a maintainer of this project, please contact us at integrations@bitpay.com. Developers at BitPay will attempt to work along the new maintainers to ensure the project remains viable for the foreseeable future.
 
 # Description
 

@@ -1,9 +1,9 @@
 > [!WARNING]
-> **This plugin is no longer supported.**
+> **This repository is archived and no longer maintained by BitPay.**
 >
-> BitPay does not maintain this plugin anymore. It will not get updates, bug fixes or security fixes. This repository will be archived and become read-only.
+> It is read-only and will not receive updates, bug fixes, or security fixes. Please do not start new integrations from this code.
 >
-> If you use this plugin, please move to a supported BitPay integration. You can find the current list at https://developer.bitpay.com/docs/bitpay-integration-guide.
+> For currently supported integrations, see [eCommerce Plugins](https://developer.bitpay.com/docs/plugins) and [Libraries](https://developer.bitpay.com/docs/libraries). If you already use this code, we recommend moving to a supported integration.
 
 ## Build Status
 
